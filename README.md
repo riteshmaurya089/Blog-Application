@@ -1,3 +1,4 @@
+**CA Monk - Blog Application**
 A modern blog application built using React, TypeScript, TanStack Query, Tailwind CSS, and shadcn/ui, with a JSON server backend.
 
 This project is designed for the CA Monk Frontend Developer Assignment and demonstrates:
