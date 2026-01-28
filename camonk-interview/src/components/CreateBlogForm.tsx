@@ -1,86 +1,150 @@
-import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createBlog, BlogInput, Blog } from "../api/blogApi";
+import { useState } from "react";
+import { createBlog } from "../api/blogApi";
 
-export default function CreateBlogForm() {
+type Props = {
+  onSuccess: () => void;
+};
+
+export default function CreateBlogForm({ onSuccess }: Props) {
   const [title, setTitle] = useState("");
   const [description, setDesc] = useState("");
   const [content, setContent] = useState("");
 
-  const client = useQueryClient();
+  const [errors, setErrors] = useState({
+    title: "",
+    description: "",
+    content: "",
+  });
 
-  const mutation = useMutation<Blog, unknown, BlogInput>({
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
     mutationFn: createBlog,
-    onSuccess: (newBlog) => {
-      // Update the blogs list instantly without waiting for refetch
-      client.setQueryData<Blog[]>(["blogs"], (old = []) => [newBlog, ...old]);
-
-      // Clear form
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blogs"] });
       setTitle("");
       setDesc("");
       setContent("");
-
-      alert("Blog created successfully!");
-    },
-    onError: (error) => {
-      console.error("Create blog error:", error);
-      alert("Failed to create blog. Try again.");
+      setErrors({ title: "", description: "", content: "" });
+      onSuccess();
     },
   });
 
-  const isLoading = mutation.status === "pending";
+  // ✅ Validation
+  const validate = () => {
+    let valid = true;
+    const newErrors = { title: "", description: "", content: "" };
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (!title || !description || !content) {
-      alert("All fields are required!");
-      return;
+    if (!title.trim()) {
+      newErrors.title = "Title is required";
+      valid = false;
     }
+
+    if (!description.trim()) {
+      newErrors.description = "Description is required";
+      valid = false;
+    }
+
+    if (!content.trim()) {
+      newErrors.content = "Content is required";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) return;
 
     mutation.mutate({
       title,
       description,
       content,
       category: ["GENERAL"],
-      coverImage: "https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg",
+      coverImage:
+        "https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg",
       date: new Date().toISOString(),
     });
   };
 
   return (
-    <div className="bg-white p-4 rounded shadow space-y-3">
-      <h2 className="font-semibold text-lg">Create Blog</h2>
+    <div className="bg-white p-6 rounded-xl shadow-md max-w-2xl mx-auto">
 
-      <input
-        className="border p-2 w-full rounded"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <h2 className="text-xl font-semibold mb-1">
+        Create New Blog
+      </h2>
+      <p className="text-sm text-gray-500 mb-6">
+        Share your thoughts with the community
+      </p>
 
-      <input
-        className="border p-2 w-full rounded"
-        placeholder="Description"
-        value={description}
-        onChange={(e) => setDesc(e.target.value)}
-      />
+      {/* TITLE */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">
+          Blog Title
+        </label>
+        <input
+          className={`border rounded-md p-2 w-full outline-none
+            ${errors.title ? "border-red-500" : ""}
+          `}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        {errors.title && (
+          <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+        )}
+      </div>
 
-      <input
-        className="border p-2 w-full rounded"
-        placeholder="Content"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      {/* DESCRIPTION */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">
+          Short Description
+        </label>
+        <input
+          className={`border rounded-md p-2 w-full outline-none
+            ${errors.description ? "border-red-500" : ""}
+          `}
+          value={description}
+          onChange={(e) => setDesc(e.target.value)}
+        />
+        {errors.description && (
+          <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+        )}
+      </div>
+
+      {/* CONTENT */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-1">
+          Blog Content
+        </label>
+        <textarea
+          className={`border rounded-md p-2 w-full h-32 outline-none
+            ${errors.content ? "border-red-500" : ""}
+          `}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+        {errors.content && (
+          <p className="text-red-500 text-sm mt-1">{errors.content}</p>
+        )}
+      </div>
 
       <button
-        onClick={handleClick}
-        disabled={isLoading}
-        className={`px-4 py-2 rounded text-white ${
-          isLoading ? "bg-gray-500 cursor-not-allowed" : "bg-black"
-        }`}
+        disabled={mutation.status === "pending"}
+        onClick={handleSubmit}
+        className="w-full bg-blue-600 text-white py-2 rounded-md
+                   hover:bg-blue-700 transition font-semibold disabled:opacity-50"
       >
-        {isLoading ? "Creating..." : "Create"}
+        {mutation.status === "pending" ? "Publishing..." : "Publish Blog"}
       </button>
+
+      {mutation.status === "error" && (
+        <p className="text-red-500 text-sm mt-3 text-center">
+          Failed to create blog. Try again.
+        </p>
+      )}
+
     </div>
   );
 }

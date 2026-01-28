@@ -1,0 +1,38 @@
+{
+  "blogs": [
+    {
+      "id": 1,
+      "title": "Future of Fintech",
+      "description": "Exploring how AI and blockchain are reshaping financial services",
+      "content": "Full blog content...",
+      "category": [
+        "FINANCE",
+        "TECH"
+      ],
+      "coverImage": "https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg",
+      "date": "2026-01-11T09:12:45.120Z"
+    },
+    {
+      "title": "Future of Full stack developer",
+      "description": "very good",
+      "content": "content upcoming soon",
+      "category": [
+        "GENERAL"
+      ],
+      "coverImage": "https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg",
+      "date": "2026-01-28T13:53:58.423Z",
+      "id": 2
+    },
+    {
+      "title": "",
+      "description": "",
+      "content": "",
+      "category": [
+        "GENERAL"
+      ],
+      "coverImage": "https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg",
+      "date": "2026-01-28T14:16:31.650Z",
+      "id": 3
+    }
+  ]
+}
